@@ -68,11 +68,11 @@ setup_info() {
 }
 
 {
-	printf '%s\n' '## Benchmarks'
-	printf '%s\n' '### Compile Time' && compile_time
-	printf '%s\n' '### Runtime'      && run_time
-	printf '%s\n' '### Code Size'    && code_size
-	printf '%s\n' '### Setup Info'   && setup_info
+	printf '%s\n' '## Benchmarks'            \
+		'### Compile Time' "$(compile_time)" \
+		'### Runtime'      "$(run_time)"     \
+		'### Code Size'    "$(code_size)"    \
+		'### Setup Info'   "$(setup_info)"
 } | sed -e 's:\./target/debug/::g' \
 		-e 's/cargo build --bin//g' |
 		deno fmt --ext md - >| bench.md
