@@ -1,6 +1,6 @@
 ## Cleaner Tukosmo Error Handling
 
-This proposal repository contains a Proof of Concept (PoC) that leverages crates to streamline error handling in [`Tukosmo`][1]. While the code is ready for implementation, it's advisable to first extend `DomainError` accordingly.
+This proposal repository contains a Proof of Concept (PoC) that leverages crates to streamline error handling in [`Tukosmo`][1]. While the code is ready to be implemented, it's advisable to first extend `DomainError` accordingly.
 
 ### Overview
 
