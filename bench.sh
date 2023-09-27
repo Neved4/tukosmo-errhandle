@@ -1,39 +1,46 @@
 #!/bin/sh
+# cargo, deno, hyperfine, rustc
 set -Cefu
 
 cleanup() {
-	rm -r bench_build.md bench_exec.md bench_size.md bench_setup.md \
-		tmp target/ 2>/dev/null
-}
+	rm -r compile_time.md run_time.md code_size.md setup_info.md tmp target/
+} 2>/dev/null
 
 trap cleanup EXIT
 
-cargo build
-hyperfine -N -w32 -r256 --export-markdown bench_exec.md \
-	'./target/debug/thiserror' \
-	'./target/debug/custom_error' \
-	'./target/debug/build_domain_error'
+compile_time() {
+	cargo build
+	hyperfine -N -w16 -r64 --export-markdown compile_time.md \
+		-p "find . ! -mindepth 1 -name 'deps' -exec rm -r {} \;" \
+		-L bin thiserror,custom_error,build_domain_error 'cargo build --bin {bin}'
+}
 
-cargo build
-hyperfine -N -w16 -r64 --export-markdown bench_build.md \
-	-p "find . ! -mindepth 1 -name 'deps' -exec rm -r {} \;" \
-	-L bin thiserror,custom_error,build_domain_error 'cargo build --bin {bin}'
+run_time() {
+	cargo build
+	hyperfine -N -w32 -r256 --export-markdown run_time.md \
+		'./target/debug/thiserror' \
+		'./target/debug/custom_error' \
+		'./target/debug/build_domain_error'
+}
 
-{ printf '%s\n' \
-	"| Command | Lines | Bytes" \
-	"| ------- | ----: | ----:"
-} > bench_size.md
+code_size() {
+	{
+		printf '%s\n' \
+			"| Command | Lines | Bytes" \
+			"| ------- | ----: | ----:"
+	} > code_size.md
 
-for file in 'custom_error' 'thiserror' 'build_domain_error'
-do
-	{ wc ./src/bin/"$file".rs; } | {
-		read -r _ lines bytes _
-		printf "| %s | %s | %s |\n" "\`$file\`" \
-			"$lines" "$bytes"
-	}
-done >> bench_size.md
+	for file in 'custom_error' 'thiserror' 'build_domain_error'
+	do
+		{ wc ./src/bin/"$file".rs; } | {
+			read -r _ lines bytes _
+			printf "| %s | %s | %s |\n" "\`$file\`" \
+				"$lines" "$bytes"
+		}
+	done >> code_size.md
+}
 
-info() {
+setup_info() {
 	uname=$(uname -ms)
 	platform="${uname%% *}"
 	arch="${uname#* }"
@@ -47,7 +54,6 @@ info() {
 
 	rs_ver=$(rustc -V | cut -d' ' -f2)
 
-	printf '\n'
 	cat <<- EOF
 		- Hardware: \`$model\`
 		- OS: \`$os\`
@@ -56,24 +62,17 @@ info() {
 	EOF
 }
 
-info >| bench_setup.md
+compile_time
+run_time
+code_size
+setup_info >| setup_info.md
 
 {
-	cat <<- EOF
-	## Benchmarks
-
-	#### Compile time
-	$(cat bench_build.md)
-
-	#### Runtime
-	$(cat bench_exec.md)
-
-	#### Size
-	$(cat bench_size.md)
-
-	#### Setup
-	$(cat bench_setup.md)
-	EOF
+	printf '%s\n' '## Benchmarks'
+	printf '%s\n' '## Compile Time' && cat compile_time.md
+	printf '%s\n' '## Runtime'      && cat run_time.md
+	printf '%s\n' '## Code Size'    && cat code_size.md
+	printf '%s\n' '## Setup Info'   && cat setup_info.md
 } | sed -e 's:\./target/debug/::g' \
 		-e 's/cargo build --bin//g' |
 		deno fmt --ext md - >| bench.md
