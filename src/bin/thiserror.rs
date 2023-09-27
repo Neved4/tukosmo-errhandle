@@ -97,5 +97,13 @@ impl From<MyError> for MyDomainError {
 }
 
 fn main() {
-    let _err = MyError::UnexpectedlyFailedToGetCurrentTimeOpenSSL;
+    let mut error_messages = Vec::new();
+
+    for _ in 0..8192 {
+        let _err = MyError::UnexpectedlyFailedToGetCurrentTimeOpenSSL;
+        error_messages.push(format!("Error: {:?}", _err));
+    }
+
+    let total_errors = error_messages.len();
+    println!("Errors collected: {}", total_errors);
 }

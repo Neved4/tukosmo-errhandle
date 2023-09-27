@@ -276,5 +276,13 @@ const _ERR_UNEXPECTEDLY_FAILED_TO_CONVERT_SELF_ERROR: DomainError =
     );
 
 fn main() {
-    let _err = _ERR_UNEXPECTEDLY_FAILED_TO_WRITE_CERT_CHAIN_ROUTE;
+    let mut error_messages = Vec::new();
+
+    for _ in 0..8192 {
+        let _err = _ERR_UNEXPECTEDLY_FAILED_TO_GET_CURRENT_TIME_OPENSSL;
+        error_messages.push(format!("Error: {:?}", _err));
+    }
+
+    let total_errors = error_messages.len();
+    println!("Errors collected: {}", total_errors);
 }

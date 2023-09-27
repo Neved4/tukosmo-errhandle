@@ -34,13 +34,13 @@ tukosmo_hydration
                     └── thiserror
 ```
 
-Ultimately, choosing any of the crates listed will reduce space usage by a factor of `2X`. At the current scale there are no significant compile or runtime differences. See [Benchmarks](bench.md).
+Ultimately, choosing any of the crates listed will reduce space usage by a factor of `2X`. At this scale, the change won't introduce significant compile or runtime differences. See [Benchmarks](bench.md).
 
 For comparison, a small sample on how these would reduce boilerplate follows:
 
 https://github.com/Neved4/tukosmo-errhandle/blob/ad1d498ab048214328a617f78cfa7b2b18c5e8e7/src/bin/build_domain_error.rs#L68-L77
 
-https://github.com/Neved4/tukosmo-errhandle/blob/ad1d498ab048214328a617f78cfa7b2b18c5e8e7/src/bin/thiserror.rs#L5-L9
+https://github.com/Neved4/tukosmo-errhandle/blob/ad1d498ab048214328a617f78cfa7b2b18c5e8e7/src/bin/thiserror.rs#L5-L8
 
 https://github.com/Neved4/tukosmo-errhandle/blob/ad1d498ab048214328a617f78cfa7b2b18c5e8e7/src/bin/custom_error.rs#L5-L8
 
