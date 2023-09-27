@@ -3,24 +3,29 @@
 set -Cefu
 
 cleanup() {
-	rm -r compile_time.md run_time.md code_size.md setup_info.md tmp target/
+	rm -r target/
 } 2>/dev/null
 
 trap cleanup EXIT
 
+filter() {
+	awk '/^\| Command | Mean /{p=1} p && !/^$/{print} p && /^$/{exit}'
+}
+
 compile_time() {
 	cargo build
-	hyperfine -N -w16 -r64 --export-markdown compile_time.md \
+	hyperfine -N -w16 -r64 --export-markdown - \
 		-p "find . ! -mindepth 1 -name 'deps' -exec rm -r {} \;" \
-		-L bin thiserror,custom_error,build_domain_error 'cargo build --bin {bin}'
+		-L bin thiserror,custom_error,build_domain_error \
+		'cargo build --bin {bin}' | filter
 }
 
 run_time() {
 	cargo build
-	hyperfine -N -w32 -r256 --export-markdown run_time.md \
+	hyperfine -N -w32 -r256 --export-markdown - \
 		'./target/debug/thiserror' \
 		'./target/debug/custom_error' \
-		'./target/debug/build_domain_error'
+		'./target/debug/build_domain_error' | filter
 }
 
 code_size() {
@@ -28,7 +33,7 @@ code_size() {
 		printf '%s\n' \
 			"| Command | Lines | Bytes" \
 			"| ------- | ----: | ----:"
-	} > code_size.md
+	}
 
 	for file in 'custom_error' 'thiserror' 'build_domain_error'
 	do
@@ -37,7 +42,7 @@ code_size() {
 			printf "| %s | %s | %s |\n" "\`$file\`" \
 				"$lines" "$bytes"
 		}
-	done >> code_size.md
+	done
 }
 
 setup_info() {
@@ -62,17 +67,12 @@ setup_info() {
 	EOF
 }
 
-compile_time
-run_time
-code_size
-setup_info >| setup_info.md
-
 {
 	printf '%s\n' '## Benchmarks'
-	printf '%s\n' '## Compile Time' && cat compile_time.md
-	printf '%s\n' '## Runtime'      && cat run_time.md
-	printf '%s\n' '## Code Size'    && cat code_size.md
-	printf '%s\n' '## Setup Info'   && cat setup_info.md
+	printf '%s\n' '## Compile Time' && compile_time
+	printf '%s\n' '## Runtime'      && run_time
+	printf '%s\n' '## Code Size'    && code_size
+	printf '%s\n' '## Setup Info'   && setup_info
 } | sed -e 's:\./target/debug/::g' \
 		-e 's/cargo build --bin//g' |
 		deno fmt --ext md - >| bench.md
