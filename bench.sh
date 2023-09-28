@@ -1,6 +1,10 @@
 #!/bin/sh
-# cargo, deno, hyperfine, rustc
 set -Cefu
+
+. "$dir"/err.sh
+. "$dir"/sys.sh
+
+check_deps 'cargo' 'deno' 'hyperfine' 'rustc'
 
 cleanup() {
 	rm -r target/
@@ -46,15 +50,7 @@ code_size() {
 }
 
 setup_info() {
-	uname=$(uname -ms)
-	platform="${uname%% *}"
-	arch="${uname#* }"
-
-	case $platform in
-	Darwin)
-		os="$(sw_vers -n) $(sw_vers -v)"
-		model=$(sysctl -n hw.model)
-	esac
+	get_sys
 
 	rs_ver=$(rustc -V | cut -d' ' -f2)
 
