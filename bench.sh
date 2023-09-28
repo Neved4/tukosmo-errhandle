@@ -1,6 +1,8 @@
 #!/bin/sh
 set -Cefu
 
+dir="${0%/*}"
+
 . "$dir"/err.sh
 . "$dir"/sys.sh
 
@@ -62,6 +64,9 @@ setup_info() {
 	EOF
 }
 
+cwd=$(pwd)
+cd "$dir"
+
 {
 	printf '%s\n' '## Benchmarks'            \
 		'### Compile Time' "$(compile_time)" \
@@ -71,3 +76,5 @@ setup_info() {
 } | sed -e 's:\./target/debug/::g' \
 		-e 's/cargo build --bin//g' |
 		deno fmt --ext md - >| bench.md
+
+cd "$cwd"
