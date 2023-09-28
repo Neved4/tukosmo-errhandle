@@ -34,7 +34,7 @@ tukosmo_hydration
                     └── thiserror
 ```
 
-Ultimately, choosing any of the crates listed will reduce space usage by a factor of `2X`. At this scale, the change won't introduce significant compile or runtime differences. See [Benchmarks](bench.md).
+Ultimately, choosing any of the crates listed will reduce space usage by a factor of `2X`. At this scale, the change won't introduce significant compile or runtime differences. See [Benchmarks](doc/bench.md).
 
 For comparison, a small sample on how these would reduce boilerplate follows:
 
@@ -45,6 +45,7 @@ https://github.com/Neved4/tukosmo-errhandle/blob/ad1d498ab048214328a617f78cfa7b2
 https://github.com/Neved4/tukosmo-errhandle/blob/ad1d498ab048214328a617f78cfa7b2b18c5e8e7/src/bin/custom_error.rs#L5-L8
 
 ### Summary
+
 Overall, using a crate or macro will greatly reduce the need for boilerplate code. While `custom_error` codebase is simpler, `thiserror` seems more actively kept and is already integrated by the project. Both codebases are small enough, making it feasible to investigate potential issues. Additionally, reimplementing the equivalent functionality within the project remains a viable option.
 
 [1]: https://github.com/lajtomekadimon/tukosmo

@@ -20,30 +20,32 @@ filter() {
 
 compile_time() {
 	cargo build
-	hyperfine -N -w16 -r64 --export-markdown - \
+	hyperfine -N -w8 -r32 --export-markdown - \
 		-p "find . ! -mindepth 1 -name 'deps' -exec rm -r {} \;" \
 		-L bin thiserror,custom_error,build_domain_error \
 		'cargo build --bin {bin}' | filter
 }
 
 run_time() {
+	path='../target/debug'
+
 	cargo build
-	hyperfine -N -w32 -r256 --export-markdown - \
-		'./target/debug/thiserror' \
-		'./target/debug/custom_error' \
-		'./target/debug/build_domain_error' | filter
+	hyperfine -N -w16 -r128 --export-markdown - \
+		"$path/thiserror" \
+		"$path/custom_error" \
+		"$path/build_domain_error" | filter
 }
 
 code_size() {
 	{
 		printf '%s\n' \
 			"| Command | Lines | Bytes" \
-			"| ------- | ----: | ----:"
+			"| :------ | ----: | ----:"
 	}
 
 	for file in 'custom_error' 'thiserror' 'build_domain_error'
 	do
-		{ wc ./src/bin/"$file".rs; } | {
+		{ wc ../src/bin/"$file".rs; } | {
 			read -r _ lines bytes _
 			printf "| %s | %s | %s |\n" "\`$file\`" \
 				"$lines" "$bytes"
@@ -64,8 +66,7 @@ setup_info() {
 	EOF
 }
 
-cwd=$(pwd)
-cd "$dir"
+cwd=$(pwd) && cd "$dir"
 
 {
 	printf '%s\n' '## Benchmarks'            \
@@ -73,8 +74,8 @@ cd "$dir"
 		'### Runtime'      "$(run_time)"     \
 		'### Code Size'    "$(code_size)"    \
 		'### Setup Info'   "$(setup_info)"
-} | sed -e 's:\./target/debug/::g' \
+} | sed -e 's:\.\./target/debug/::g' \
 		-e 's/cargo build --bin//g' |
-		deno fmt --ext md - >| bench.md
+		deno fmt --ext md - >| ../doc/bench.md
 
 cd "$cwd"
