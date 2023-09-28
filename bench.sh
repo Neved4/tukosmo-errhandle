@@ -53,8 +53,7 @@ setup_info() {
 	case $platform in
 	Darwin)
 		os="$(sw_vers -n) $(sw_vers -v)"
-		model=$(system_profiler SPHardwareDataType |
-			awk '/Model Identifier/ {print $3}')
+		model=$(sysctl -n hw.model)
 	esac
 
 	rs_ver=$(rustc -V | cut -d' ' -f2)
