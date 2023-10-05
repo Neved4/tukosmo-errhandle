@@ -14,26 +14,22 @@ cleanup() {
 
 trap cleanup EXIT
 
-filter() {
-	awk '/^\| Command | Mean /{p=1} p && !/^$/{print} p && /^$/{exit}'
-}
-
 compile_time() {
 	cargo build
-	hyperfine -N -w8 -r32 --export-markdown - \
+	hyperfine -N -w8 -r32 --style=none --export-markdown - \
 		-p "find . ! -mindepth 1 -name 'deps' -exec rm -r {} \;" \
 		-L bin thiserror,custom_error,build_domain_error \
-		'cargo build --bin {bin}' | filter
+		'cargo build --bin {bin}'
 }
 
 run_time() {
 	path='../target/debug'
 
 	cargo build
-	hyperfine -N -w16 -r128 --export-markdown - \
+	hyperfine -N -w16 -r128 --style=none --export-markdown - \
 		"$path/thiserror" \
 		"$path/custom_error" \
-		"$path/build_domain_error" | filter
+		"$path/build_domain_error"
 }
 
 code_size() {
